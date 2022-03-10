@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:plms_clz/utils/api.dart';
+import 'package:plms_clz/views/home.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -60,7 +61,12 @@ class _LoginState extends State<Login> {
                       final response = await API.login(email, password);
 
                       if (response.statusCode == 200) {
-                        Fluttertoast.showToast(msg: response.token!);
+                        Navigator.of(context)
+                            .popUntil(ModalRoute.withName('login'));
+
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const Home(),
+                        ));
                       } else {
                         Fluttertoast.showToast(msg: response.message!);
                       }

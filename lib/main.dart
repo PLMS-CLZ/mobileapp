@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:plms_clz/views/home.dart';
 import 'package:plms_clz/views/login.dart';
 
 void main() {
@@ -15,7 +16,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'PLMS',
       theme: ThemeData.dark(),
-      home: const Login(),
+      initialRoute: 'login',
+      routes: {
+        'login': (context) => const Login(),
+        'home': (context) => const Home(),
+      },
     );
   }
 }
