@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:plms_clz/models/lineman.dart';
 import 'package:plms_clz/utils/notif.dart';
@@ -38,8 +37,8 @@ class _HomeState extends State<Home> {
     });
 
     FirebaseMessaging.instance.getToken().then((token) {
-      widget.lineman.fcmToken = token;
-      Fluttertoast.showToast(msg: token ?? 'No Token');
+      if (token == null) return;
+      widget.lineman.updateFcmToken(token);
     });
   }
 
