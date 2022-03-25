@@ -44,7 +44,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAnjCzrJBqUF5xARnMxY1umv6f44C4aM8Y',
+    apiKey: 'AIzaSyBV-bmZ8qXI2rkhKl-7CjUPGrkWnCaM23g',
     appId: '1:962170906155:android:2a3bc6efb99e35f6d3ac6e',
     messagingSenderId: '962170906155',
     projectId: 'plms-clz',

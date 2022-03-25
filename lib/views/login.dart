@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:plms_clz/utils/api.dart';
+import 'package:plms_clz/models/lineman.dart';
 import 'package:plms_clz/views/home.dart';
 
 class Login extends StatefulWidget {
@@ -58,17 +57,16 @@ class _LoginState extends State<Login> {
                       final email = emailController.text;
                       final password = passwordController.text;
 
-                      final response = await API.login(email, password);
+                      final lineman = Lineman(email, password);
+                      final result = await lineman.login();
 
-                      if (response.statusCode == 200) {
-                        Navigator.of(context)
-                            .popUntil(ModalRoute.withName('login'));
+                      if (result == 200) {
+                        Navigator.of(context).popUntil(
+                            (route) => Navigator.of(context).canPop());
 
                         Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => const Home(),
+                          builder: (context) => Home(lineman),
                         ));
-                      } else {
-                        Fluttertoast.showToast(msg: response.message!);
                       }
                     },
                   ),
