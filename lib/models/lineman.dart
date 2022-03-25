@@ -41,7 +41,7 @@ class Lineman {
       fcmToken = data['fcmToken'];
 
       Fluttertoast.showToast(
-        msg: 'Logged In!',
+        msg: "Logged in!",
       );
     } else {
       Fluttertoast.showToast(
@@ -50,5 +50,28 @@ class Lineman {
     }
 
     return response.statusCode;
+  }
+
+  Future<void> updateFcmToken(String token) async {
+    final url = Uri.https(domain, "/api/lineman/" + id.toString());
+    final headers = <String, String>{
+      HttpHeaders.contentTypeHeader: ContentType.json.toString(),
+      HttpHeaders.acceptHeader: ContentType.json.toString(),
+      HttpHeaders.authorizationHeader: "Bearer " + apiToken!,
+    };
+
+    final response = await http.patch(
+      url,
+      headers: headers,
+      body: jsonEncode({"fcm_token": token}),
+    );
+
+    if (response.statusCode == HttpStatus.ok) {
+      fcmToken = token;
+    } else {
+      Fluttertoast.showToast(
+        msg: response.body,
+      );
+    }
   }
 }
