@@ -13,6 +13,9 @@ class _LoginState extends State<Login> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  bool inputEnabled = true;
+  bool passwordObscured = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,40 +38,70 @@ class _LoginState extends State<Login> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   TextField(
+                    controller: emailController,
                     decoration: const InputDecoration(
                       labelText: "E-mail",
                       hintText: "E-mail",
                       icon: Icon(Icons.email_outlined),
                     ),
-                    controller: emailController,
+                    enabled: inputEnabled,
                   ),
                   TextField(
-                    decoration: const InputDecoration(
+                    controller: passwordController,
+                    decoration: InputDecoration(
                       labelText: "Password",
                       hintText: "Password",
-                      icon: Icon(Icons.lock_outline),
+                      icon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          passwordObscured
+                              ? Icons.visibility_rounded
+                              : Icons.visibility_off_rounded,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            passwordObscured = !passwordObscured;
+                          });
+                        },
+                      ),
                     ),
-                    controller: passwordController,
+                    enabled: inputEnabled,
+                    obscureText: passwordObscured,
                   ),
                   const SizedBox(height: 40),
                   ElevatedButton(
                     child: const Text("Login"),
-                    onPressed: () async {
-                      final email = emailController.text;
-                      final password = passwordController.text;
+                    onPressed: inputEnabled
+                        ? () {
+                            final email = emailController.text;
+                            final password = passwordController.text;
+                            final lineman = Lineman(email, password);
 
-                      final lineman = Lineman(email, password);
-                      final result = await lineman.login();
+                            // dismiss keyboard during async call
+                            FocusScope.of(context).requestFocus(FocusNode());
 
-                      if (result == 200) {
-                        Navigator.of(context).popUntil(
-                            (route) => Navigator.of(context).canPop());
+                            // start the modal progress HUD
+                            setState(() {
+                              inputEnabled = false;
+                            });
 
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => Home(lineman),
-                        ));
-                      }
-                    },
+                            Future((() async {
+                              final statusCode = await lineman.login();
+
+                              if (statusCode == 200) {
+                                Navigator.of(context).popUntil(
+                                    (route) => Navigator.of(context).canPop());
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => Home(lineman),
+                                ));
+                              } else {
+                                setState(() {
+                                  inputEnabled = true;
+                                });
+                              }
+                            }));
+                          }
+                        : null,
                   ),
                 ],
               ),
