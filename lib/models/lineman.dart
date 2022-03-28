@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:plms_clz/models/incident.dart';
 
 const domain = "plms-clz.herokuapp.com";
 
@@ -50,7 +51,7 @@ class Lineman {
   }
 
   Future<int> updatePassword(String newPassword) async {
-    final url = Uri.https(domain, "/api/lineman/" + id.toString());
+    final url = Uri.https(domain, '/api/lineman/$id');
     final headers = <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.toString(),
       HttpHeaders.acceptHeader: ContentType.json.toString(),
@@ -82,7 +83,7 @@ class Lineman {
   }
 
   Future<void> updateFcmToken(String newToken) async {
-    final url = Uri.https(domain, "/api/lineman/" + id.toString());
+    final url = Uri.https(domain, '/api/lineman/$id');
     final headers = <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.toString(),
       HttpHeaders.acceptHeader: ContentType.json.toString(),
@@ -109,5 +110,25 @@ class Lineman {
         toastLength: Toast.LENGTH_LONG,
       );
     }
+  }
+
+  Future<List<Incident>> getIncidents() async {
+    final url = Uri.https(domain, '/api/lineman/$id/incidents');
+    final headers = <String, String>{
+      HttpHeaders.contentTypeHeader: ContentType.json.toString(),
+      HttpHeaders.acceptHeader: ContentType.json.toString(),
+      HttpHeaders.authorizationHeader: "Bearer " + apiToken!,
+    };
+
+    final response = await http.get(
+      url,
+      headers: headers,
+    );
+
+    final data = jsonDecode(response.body) as List<dynamic>;
+
+    final incidents = data.map((e) => Incident.fromJson(e)).toList();
+
+    return incidents;
   }
 }
