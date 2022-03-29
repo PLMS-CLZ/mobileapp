@@ -26,194 +26,177 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Power Line Monitoring Systems"),
-      ),
-      body: Center(
-        child: ListView(
-          children: [
-            const SizedBox(
-              height: 50,
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 60, 20, 0),
+        children: [
+          CircleAvatar(
+            child: Image.asset('assets/logo.png'),
+            radius: 100,
+          ),
+          const SizedBox(height: 30),
+          TextField(
+            controller: emailController,
+            decoration: const InputDecoration(
+              labelText: "E-mail",
+              hintText: "E-mail",
+              icon: Icon(Icons.email_outlined),
             ),
-            CircleAvatar(
-              child: Image.asset('assets/logo.png'),
-              radius: 100,
+            enabled: inputEnabled && !changePassword,
+          ),
+          TextField(
+            controller: passwordController,
+            decoration: InputDecoration(
+              labelText: "Password",
+              hintText: "Password",
+              icon: const Icon(Icons.lock_outline),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  passwordObscured
+                      ? Icons.visibility_rounded
+                      : Icons.visibility_off_rounded,
+                ),
+                onPressed: () {
+                  setState(() {
+                    passwordObscured = !passwordObscured;
+                  });
+                },
+              ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+            enabled: inputEnabled && !changePassword,
+            obscureText: passwordObscured || changePassword,
+          ),
+          ...changePassword
+              ? [
+                  const SizedBox(height: 30),
+                  const Text("Change Password:"),
                   TextField(
-                    controller: emailController,
-                    decoration: const InputDecoration(
-                      labelText: "E-mail",
-                      hintText: "E-mail",
-                      icon: Icon(Icons.email_outlined),
-                    ),
-                    enabled: inputEnabled && !changePassword,
-                  ),
-                  TextField(
-                    controller: passwordController,
+                    controller: newPasswordController,
                     decoration: InputDecoration(
-                      labelText: "Password",
+                      labelText: "New Password",
                       hintText: "Password",
-                      icon: const Icon(Icons.lock_outline),
+                      icon: const Icon(Icons.password),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          passwordObscured
+                          newPasswordObscured
                               ? Icons.visibility_rounded
                               : Icons.visibility_off_rounded,
                         ),
                         onPressed: () {
                           setState(() {
-                            passwordObscured = !passwordObscured;
+                            newPasswordObscured = !newPasswordObscured;
                           });
                         },
                       ),
                     ),
-                    enabled: inputEnabled && !changePassword,
-                    obscureText: passwordObscured || changePassword,
+                    enabled: inputEnabled,
+                    obscureText: newPasswordObscured,
                   ),
-                  ...changePassword
-                      ? [
-                          const SizedBox(height: 30),
-                          const Text("Change Password:"),
-                          TextField(
-                            controller: newPasswordController,
-                            decoration: InputDecoration(
-                              labelText: "New Password",
-                              hintText: "Password",
-                              icon: const Icon(Icons.password),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  newPasswordObscured
-                                      ? Icons.visibility_rounded
-                                      : Icons.visibility_off_rounded,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    newPasswordObscured = !newPasswordObscured;
-                                  });
-                                },
-                              ),
-                            ),
-                            enabled: inputEnabled,
-                            obscureText: newPasswordObscured,
-                          ),
-                          TextField(
-                            controller: confirmPasswordController,
-                            decoration: InputDecoration(
-                              labelText: "Confirm Password",
-                              hintText: "Password",
-                              icon: const Icon(Icons.password),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  confirmPasswordObscured
-                                      ? Icons.visibility_rounded
-                                      : Icons.visibility_off_rounded,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    confirmPasswordObscured =
-                                        !confirmPasswordObscured;
-                                  });
-                                },
-                              ),
-                            ),
-                            enabled: inputEnabled,
-                            obscureText: confirmPasswordObscured,
-                          )
-                        ]
-                      : [],
-                  const SizedBox(height: 40),
-                  ElevatedButton(
-                    child: Text(changePassword ? "Update Password" : "Login"),
-                    onPressed: inputEnabled
-                        ? () {
-                            // dismiss keyboard during async call
-                            FocusScope.of(context).requestFocus(FocusNode());
+                  TextField(
+                    controller: confirmPasswordController,
+                    decoration: InputDecoration(
+                      labelText: "Confirm Password",
+                      hintText: "Password",
+                      icon: const Icon(Icons.password),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          confirmPasswordObscured
+                              ? Icons.visibility_rounded
+                              : Icons.visibility_off_rounded,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            confirmPasswordObscured = !confirmPasswordObscured;
+                          });
+                        },
+                      ),
+                    ),
+                    enabled: inputEnabled,
+                    obscureText: confirmPasswordObscured,
+                  )
+                ]
+              : [],
+          const SizedBox(height: 40),
+          ElevatedButton(
+            child: Text(changePassword ? "Update Password" : "Login"),
+            onPressed: inputEnabled
+                ? () {
+                    // dismiss keyboard during async call
+                    FocusScope.of(context).requestFocus(FocusNode());
 
-                            // start the modal progress HUD
+                    // start the modal progress HUD
+                    setState(() {
+                      inputEnabled = false;
+                    });
+
+                    Future((() async {
+                      if (changePassword) {
+                        final newPassword = newPasswordController.text;
+                        final confirmPassword = confirmPasswordController.text;
+
+                        if (newPassword != confirmPassword) {
+                          Fluttertoast.showToast(
+                            msg: "Password does not match.",
+                          );
+
+                          setState(() {
+                            inputEnabled = true;
+                          });
+                        } else if (newPassword == "plmsystem") {
+                          Fluttertoast.showToast(
+                            msg:
+                                "New password must not be the default password.",
+                          );
+
+                          setState(() {
+                            inputEnabled = true;
+                          });
+                        } else {
+                          final statusCode =
+                              await lineman.updatePassword(newPassword);
+
+                          if (statusCode == 200) {
+                            Navigator.of(context).popUntil(
+                                (route) => Navigator.of(context).canPop());
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const Login(),
+                            ));
+                          } else {
                             setState(() {
-                              inputEnabled = false;
+                              inputEnabled = true;
                             });
-
-                            Future((() async {
-                              if (changePassword) {
-                                final newPassword = newPasswordController.text;
-                                final confirmPassword =
-                                    confirmPasswordController.text;
-
-                                if (newPassword != confirmPassword) {
-                                  Fluttertoast.showToast(
-                                    msg: "Password does not match.",
-                                  );
-
-                                  setState(() {
-                                    inputEnabled = true;
-                                  });
-                                } else if (newPassword == "plmsystem") {
-                                  Fluttertoast.showToast(
-                                    msg:
-                                        "New password must not be the default password.",
-                                  );
-
-                                  setState(() {
-                                    inputEnabled = true;
-                                  });
-                                } else {
-                                  final statusCode =
-                                      await lineman.updatePassword(newPassword);
-
-                                  if (statusCode == 200) {
-                                    Navigator.of(context).popUntil((route) =>
-                                        Navigator.of(context).canPop());
-                                    Navigator.of(context)
-                                        .push(MaterialPageRoute(
-                                      builder: (context) => const Login(),
-                                    ));
-                                  } else {
-                                    setState(() {
-                                      inputEnabled = true;
-                                    });
-                                  }
-                                }
-                              } else {
-                                final email = emailController.text;
-                                final password = passwordController.text;
-                                lineman = Lineman(email, password);
-                                final statusCode = await lineman.login();
-
-                                if (statusCode == 200) {
-                                  if (password == "plmsystem") {
-                                    setState(() {
-                                      changePassword = true;
-                                      inputEnabled = true;
-                                    });
-                                  } else {
-                                    Navigator.of(context).popUntil((route) =>
-                                        Navigator.of(context).canPop());
-                                    Navigator.of(context)
-                                        .push(MaterialPageRoute(
-                                      builder: (context) => Home(lineman),
-                                    ));
-                                  }
-                                } else {
-                                  setState(() {
-                                    inputEnabled = true;
-                                  });
-                                }
-                              }
-                            }));
                           }
-                        : null,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+                        }
+                      } else {
+                        final email = emailController.text;
+                        final password = passwordController.text;
+                        lineman = Lineman(email, password);
+                        final statusCode = await lineman.login();
+
+                        if (statusCode == 200) {
+                          if (password == "plmsystem") {
+                            setState(() {
+                              changePassword = true;
+                              inputEnabled = true;
+                            });
+                          } else {
+                            Navigator.of(context).popUntil(
+                                (route) => Navigator.of(context).canPop());
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => Home(lineman),
+                            ));
+                          }
+                        } else {
+                          setState(() {
+                            inputEnabled = true;
+                          });
+                        }
+                      }
+                    }));
+                  }
+                : null,
+          ),
+          const SizedBox(height: 50),
+        ],
       ),
     );
   }
