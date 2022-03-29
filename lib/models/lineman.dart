@@ -70,7 +70,8 @@ class Lineman {
       password = newPassword;
     } else {
       final errors = (data['errors']['password'] as List<dynamic>)
-          .map((e) => e.toString()) as List<String>;
+          .map((e) => e.toString())
+          .toList();
       Fluttertoast.showToast(
         msg: errors.isNotEmpty
             ? errors.join('\n')
