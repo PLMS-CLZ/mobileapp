@@ -3,8 +3,8 @@ import 'package:plms_clz/models/incidentinfo.dart';
 class Incident {
   int id;
   bool resolved;
-  DateTime createdAt;
-  DateTime updatedAt;
+  String createdAt;
+  String updatedAt;
   List<IncidentInfo> info;
 
   Incident({
@@ -19,8 +19,8 @@ class Incident {
     return Incident(
       id: json['id'],
       resolved: json['resolved'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
       info: (json['info'] as List<dynamic>)
           .map((e) => IncidentInfo.fromJson(e))
           .toList(),

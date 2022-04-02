@@ -2,8 +2,8 @@ class IncidentInfo {
   int id;
   String title;
   String description;
-  DateTime createdAt;
-  DateTime updatedAt;
+  String createdAt;
+  String updatedAt;
 
   IncidentInfo({
     required this.id,
@@ -18,8 +18,8 @@ class IncidentInfo {
       id: json['id'],
       title: json['title'],
       description: json['description'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
     );
   }
 }
