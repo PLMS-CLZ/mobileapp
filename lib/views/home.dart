@@ -119,21 +119,30 @@ class _HomeState extends State<Home> {
             itemBuilder: (context, index) {
               final incident = incidents[index];
 
-              return ListTile(
-                title: Text('Incident ${incident.id}'),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              return Card(
+                child: ListTile(
+                  minLeadingWidth: 0,
+                  leading: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        '${incident.info[0].title} - ${incident.info[0].description}',
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        incident.info[0].updatedAt.toString(),
-                      ),
+                        incident.id.toString(),
+                        style: const TextStyle(fontSize: 35),
+                      )
                     ],
+                  ),
+                  title: Text(incident.info[0].title),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(incident.info[0].description),
+                        const SizedBox(height: 10),
+                        Text(incident.info[0].updatedAt),
+                      ],
+                    ),
                   ),
                 ),
               );
