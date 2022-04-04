@@ -91,6 +91,41 @@ class Lineman {
     return response.statusCode;
   }
 
+  Future<int> logout() async {
+    final prefs = await preferences;
+    final url = Uri.https(domain, "/api/lineman/logout");
+    final headers = <String, String>{
+      HttpHeaders.contentTypeHeader: ContentType.json.toString(),
+      HttpHeaders.acceptHeader: ContentType.json.toString(),
+      HttpHeaders.authorizationHeader: "Bearer " + apiToken!,
+    };
+
+    final response = await http.post(
+      url,
+      headers: headers,
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == HttpStatus.ok) {
+      id = null;
+      name = null;
+      email = null;
+      barangay = null;
+      apiToken = null;
+      fcmToken = null;
+
+      prefs.remove('apiToken');
+    } else {
+      Fluttertoast.showToast(
+        msg: data['message'] ?? 'Failed to logout',
+        toastLength: Toast.LENGTH_LONG,
+      );
+    }
+
+    return response.statusCode;
+  }
+
   Future<int> updatePassword(String newPassword) async {
     final url = Uri.https(domain, '/api/lineman/$id');
     final headers = <String, String>{
