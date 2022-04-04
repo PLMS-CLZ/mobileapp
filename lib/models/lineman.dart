@@ -4,22 +4,60 @@ import 'dart:io';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:plms_clz/models/incident.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const domain = "plms-clz.herokuapp.com";
+final preferences = SharedPreferences.getInstance();
 
 class Lineman {
-  String email;
-  String password;
-
   int? id;
   String? name;
+  String? email;
   String? barangay;
   String? apiToken;
   String? fcmToken;
 
-  Lineman(this.email, this.password);
+  Lineman();
 
-  Future<int> login() async {
+  Future<int> resume() async {
+    final prefs = await preferences;
+    final token = prefs.getString('apiToken');
+
+    if (token == null) return -1;
+
+    final url = Uri.https(domain, '/api/lineman');
+    final headers = <String, String>{
+      HttpHeaders.contentTypeHeader: ContentType.json.toString(),
+      HttpHeaders.acceptHeader: ContentType.json.toString(),
+      HttpHeaders.authorizationHeader: "Bearer " + token,
+    };
+
+    final response = await http.get(
+      url,
+      headers: headers,
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == HttpStatus.ok) {
+      id = data['id'];
+      name = data['name'];
+      email = data['email'];
+      barangay = data['barangay'];
+      apiToken = data['token'];
+      fcmToken = data['fcmToken'];
+    } else {
+      Fluttertoast.showToast(
+        msg: data['message'] ?? 'Failed to resume',
+        toastLength: Toast.LENGTH_LONG,
+      );
+    }
+
+    return response.statusCode;
+  }
+
+  Future<int> login(String _email, String _password) async {
+    final prefs = await preferences;
     final url = Uri.https(domain, "/api/lineman/login");
     final headers = <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.toString(),
@@ -29,7 +67,7 @@ class Lineman {
     final response = await http.post(
       url,
       headers: headers,
-      body: jsonEncode({"email": email, "password": password}),
+      body: jsonEncode({"email": _email, "password": _password}),
     );
 
     final data = jsonDecode(response.body);
@@ -37,9 +75,12 @@ class Lineman {
     if (response.statusCode == HttpStatus.ok) {
       id = data['id'];
       name = data['name'];
+      email = data['email'];
       barangay = data['barangay'];
       apiToken = data['token'];
       fcmToken = data['fcmToken'];
+
+      prefs.setString('apiToken', apiToken ?? '');
     } else {
       Fluttertoast.showToast(
         msg: data['message'] ?? 'Failed to login',
@@ -66,9 +107,7 @@ class Lineman {
 
     final data = jsonDecode(response.body);
 
-    if (response.statusCode == HttpStatus.ok) {
-      password = newPassword;
-    } else {
+    if (response.statusCode != HttpStatus.ok) {
       final errors = (data['errors']['password'] as List<dynamic>)
           .map((e) => e.toString())
           .toList();
