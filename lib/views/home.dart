@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:plms_clz/models/incident.dart';
 import 'package:plms_clz/models/lineman.dart';
 import 'package:plms_clz/utils/notif.dart';
+import 'package:plms_clz/views/login.dart';
 
 class Home extends StatefulWidget {
   final Lineman lineman;
@@ -250,7 +251,17 @@ class _HomeState extends State<Home> {
           const SizedBox(height: 40),
           Center(
             child: TextButton(
-                onPressed: () {},
+                onPressed: () async {
+                  int statusCode = await widget.lineman.logout();
+
+                  if (statusCode == 200) {
+                    Navigator.of(context)
+                        .popUntil((route) => Navigator.of(context).canPop());
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const Login(),
+                    ));
+                  }
+                },
                 child: const Text(
                   'Log out',
                   style: TextStyle(
