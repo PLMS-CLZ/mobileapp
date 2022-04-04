@@ -47,10 +47,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'PLMS',
       theme: ThemeData.dark(),
-      initialRoute: 'login',
-      routes: {
-        'login': (context) => const Login(),
-      },
+      home: const Login(),
     );
   }
 }
