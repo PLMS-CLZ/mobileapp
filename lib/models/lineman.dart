@@ -44,7 +44,7 @@ class Lineman {
       name = data['name'];
       email = data['email'];
       barangay = data['barangay'];
-      apiToken = data['token'];
+      apiToken = token;
       fcmToken = data['fcmToken'];
     } else {
       Fluttertoast.showToast(
