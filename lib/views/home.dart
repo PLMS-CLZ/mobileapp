@@ -212,7 +212,7 @@ class _HomeState extends State<Home> {
           ),
           const SizedBox(height: 5),
           Text(
-            widget.lineman.email,
+            widget.lineman.email ?? 'Not Set',
             style: const TextStyle(
               fontSize: 16,
             ),
