@@ -27,7 +27,7 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 60, 20, 0),
+        padding: const EdgeInsets.fromLTRB(20, 120, 20, 0),
         children: [
           CircleAvatar(
             child: Image.asset('assets/logo.png'),
