@@ -11,6 +11,7 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final lineman = Lineman();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final newPasswordController = TextEditingController();
@@ -21,183 +22,215 @@ class _LoginState extends State<Login> {
   bool newPasswordObscured = true;
   bool confirmPasswordObscured = true;
   bool changePassword = false;
-  late Lineman lineman;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 120, 20, 0),
-        children: [
-          CircleAvatar(
-            child: Image.asset('assets/logo.png'),
-            radius: 100,
-          ),
-          const SizedBox(height: 30),
-          TextField(
-            controller: emailController,
-            decoration: const InputDecoration(
-              labelText: "E-mail",
-              hintText: "E-mail",
-              icon: Icon(Icons.email_outlined),
-            ),
-            enabled: inputEnabled && !changePassword,
-          ),
-          TextField(
-            controller: passwordController,
-            decoration: InputDecoration(
-              labelText: "Password",
-              hintText: "Password",
-              icon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  passwordObscured
-                      ? Icons.visibility_rounded
-                      : Icons.visibility_off_rounded,
-                ),
-                onPressed: () {
-                  setState(() {
-                    passwordObscured = !passwordObscured;
-                  });
-                },
+    return FutureBuilder(
+      future: lineman.resume(),
+      builder: (context, AsyncSnapshot<int> snapshot) {
+        final connectionDone = snapshot.connectionState == ConnectionState.done;
+
+        if (connectionDone && snapshot.hasData) {
+          int statusCode = snapshot.data!;
+
+          if (statusCode == 200) {
+            Future.delayed(const Duration(milliseconds: 2000), () {
+              Navigator.of(context)
+                  .popUntil((route) => Navigator.of(context).canPop());
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => Home(lineman),
+              ));
+            });
+
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Colors.green,
               ),
-            ),
-            enabled: inputEnabled && !changePassword,
-            obscureText: passwordObscured || changePassword,
-          ),
-          ...changePassword
-              ? [
-                  const SizedBox(height: 30),
-                  const Text("Change Password:"),
-                  TextField(
-                    controller: newPasswordController,
-                    decoration: InputDecoration(
-                      labelText: "New Password",
-                      hintText: "Password",
-                      icon: const Icon(Icons.password),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          newPasswordObscured
-                              ? Icons.visibility_rounded
-                              : Icons.visibility_off_rounded,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            newPasswordObscured = !newPasswordObscured;
-                          });
-                        },
-                      ),
-                    ),
-                    enabled: inputEnabled,
-                    obscureText: newPasswordObscured,
+            );
+          }
+
+          return Scaffold(
+            body: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 120, 20, 0),
+              children: [
+                CircleAvatar(
+                  child: Image.asset('assets/logo.png'),
+                  radius: 100,
+                ),
+                const SizedBox(height: 30),
+                TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    labelText: "E-mail",
+                    hintText: "E-mail",
+                    icon: Icon(Icons.email_outlined),
                   ),
-                  TextField(
-                    controller: confirmPasswordController,
-                    decoration: InputDecoration(
-                      labelText: "Confirm Password",
-                      hintText: "Password",
-                      icon: const Icon(Icons.password),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          confirmPasswordObscured
-                              ? Icons.visibility_rounded
-                              : Icons.visibility_off_rounded,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            confirmPasswordObscured = !confirmPasswordObscured;
-                          });
-                        },
+                  enabled: inputEnabled && !changePassword,
+                ),
+                TextField(
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    hintText: "Password",
+                    icon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        passwordObscured
+                            ? Icons.visibility_rounded
+                            : Icons.visibility_off_rounded,
                       ),
+                      onPressed: () {
+                        setState(() {
+                          passwordObscured = !passwordObscured;
+                        });
+                      },
                     ),
-                    enabled: inputEnabled,
-                    obscureText: confirmPasswordObscured,
-                  )
-                ]
-              : [],
-          const SizedBox(height: 40),
-          ElevatedButton(
-            child: Text(changePassword ? "Update Password" : "Login"),
-            onPressed: inputEnabled
-                ? () {
-                    // dismiss keyboard during async call
-                    FocusScope.of(context).requestFocus(FocusNode());
+                  ),
+                  enabled: inputEnabled && !changePassword,
+                  obscureText: passwordObscured || changePassword,
+                ),
+                ...changePassword
+                    ? [
+                        const SizedBox(height: 30),
+                        const Text("Change Password:"),
+                        TextField(
+                          controller: newPasswordController,
+                          decoration: InputDecoration(
+                            labelText: "New Password",
+                            hintText: "Password",
+                            icon: const Icon(Icons.password),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                newPasswordObscured
+                                    ? Icons.visibility_rounded
+                                    : Icons.visibility_off_rounded,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  newPasswordObscured = !newPasswordObscured;
+                                });
+                              },
+                            ),
+                          ),
+                          enabled: inputEnabled,
+                          obscureText: newPasswordObscured,
+                        ),
+                        TextField(
+                          controller: confirmPasswordController,
+                          decoration: InputDecoration(
+                            labelText: "Confirm Password",
+                            hintText: "Password",
+                            icon: const Icon(Icons.password),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                confirmPasswordObscured
+                                    ? Icons.visibility_rounded
+                                    : Icons.visibility_off_rounded,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  confirmPasswordObscured =
+                                      !confirmPasswordObscured;
+                                });
+                              },
+                            ),
+                          ),
+                          enabled: inputEnabled,
+                          obscureText: confirmPasswordObscured,
+                        )
+                      ]
+                    : [],
+                const SizedBox(height: 40),
+                ElevatedButton(
+                  child: Text(changePassword ? "Update Password" : "Login"),
+                  onPressed: inputEnabled
+                      ? () {
+                          // dismiss keyboard during async call
+                          FocusScope.of(context).requestFocus(FocusNode());
 
-                    // start the modal progress HUD
-                    setState(() {
-                      inputEnabled = false;
-                    });
-
-                    Future((() async {
-                      if (changePassword) {
-                        final newPassword = newPasswordController.text;
-                        final confirmPassword = confirmPasswordController.text;
-
-                        if (newPassword != confirmPassword) {
-                          Fluttertoast.showToast(
-                            msg: "Password does not match.",
-                          );
-
+                          // start the modal progress HUD
                           setState(() {
-                            inputEnabled = true;
+                            inputEnabled = false;
                           });
-                        } else if (newPassword == "plmsystem") {
-                          Fluttertoast.showToast(
-                            msg:
-                                "New password must not be the default password.",
-                          );
 
-                          setState(() {
-                            inputEnabled = true;
-                          });
-                        } else {
-                          final statusCode =
-                              await lineman.updatePassword(newPassword);
+                          Future((() async {
+                            if (changePassword) {
+                              final newPassword = newPasswordController.text;
+                              final confirmPassword =
+                                  confirmPasswordController.text;
 
-                          if (statusCode == 200) {
-                            Navigator.of(context).popUntil(
-                                (route) => Navigator.of(context).canPop());
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const Login(),
-                            ));
-                          } else {
-                            setState(() {
-                              inputEnabled = true;
-                            });
-                          }
+                              if (newPassword != confirmPassword) {
+                                Fluttertoast.showToast(
+                                  msg: "Password does not match.",
+                                );
+
+                                setState(() {
+                                  inputEnabled = true;
+                                });
+                              } else if (newPassword == "plmsystem") {
+                                Fluttertoast.showToast(
+                                  msg:
+                                      "New password must not be the default password.",
+                                );
+
+                                setState(() {
+                                  inputEnabled = true;
+                                });
+                              } else {
+                                final statusCode =
+                                    await lineman.updatePassword(newPassword);
+
+                                if (statusCode == 200) {
+                                  Navigator.of(context).popUntil((route) =>
+                                      Navigator.of(context).canPop());
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => const Login(),
+                                  ));
+                                } else {
+                                  setState(() {
+                                    inputEnabled = true;
+                                  });
+                                }
+                              }
+                            } else {
+                              final email = emailController.text;
+                              final password = passwordController.text;
+                              final statusCode =
+                                  await lineman.login(email, password);
+
+                              if (statusCode == 200) {
+                                if (password == "plmsystem") {
+                                  setState(() {
+                                    changePassword = true;
+                                    inputEnabled = true;
+                                  });
+                                } else {
+                                  Navigator.of(context).popUntil((route) =>
+                                      Navigator.of(context).canPop());
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => Home(lineman),
+                                  ));
+                                }
+                              } else {
+                                setState(() {
+                                  inputEnabled = true;
+                                });
+                              }
+                            }
+                          }));
                         }
-                      } else {
-                        final email = emailController.text;
-                        final password = passwordController.text;
-                        lineman = Lineman(email, password);
-                        final statusCode = await lineman.login();
-
-                        if (statusCode == 200) {
-                          if (password == "plmsystem") {
-                            setState(() {
-                              changePassword = true;
-                              inputEnabled = true;
-                            });
-                          } else {
-                            Navigator.of(context).popUntil(
-                                (route) => Navigator.of(context).canPop());
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => Home(lineman),
-                            ));
-                          }
-                        } else {
-                          setState(() {
-                            inputEnabled = true;
-                          });
-                        }
-                      }
-                    }));
-                  }
-                : null,
-          ),
-          const SizedBox(height: 50),
-        ],
-      ),
+                      : null,
+                ),
+                const SizedBox(height: 50),
+              ],
+            ),
+          );
+        } else {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
     );
   }
 }
