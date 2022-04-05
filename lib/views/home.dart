@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'package:plms_clz/models/incident.dart';
 import 'package:plms_clz/models/lineman.dart';
 import 'package:plms_clz/utils/notif.dart';
@@ -19,9 +18,6 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int selectedScreen = 0;
-
-  final Completer<GoogleMapController> mapController = Completer();
-  Widget? googleMap;
 
   @override
   void initState() {
@@ -47,7 +43,7 @@ class _HomeState extends State<Home> {
     });
   }
 
-  static const CameraPosition cadizCity = CameraPosition(
+  CameraPosition initialCenter = const CameraPosition(
     target: LatLng(10.94463755493866, 123.27352044217186),
     zoom: 13,
   );
@@ -91,18 +87,61 @@ class _HomeState extends State<Home> {
   }
 
   Widget homeScreen() {
-    googleMap ??= GoogleMap(
-      mapType: MapType.terrain,
-      initialCameraPosition: cadizCity,
-      compassEnabled: true,
-      myLocationEnabled: true,
-      myLocationButtonEnabled: true,
-      onMapCreated: (GoogleMapController controller) {
-        mapController.complete(controller);
+    return FutureBuilder(
+      future: () async {
+        final location = Location();
+
+        bool _serviceEnabled = await location.serviceEnabled();
+        if (!_serviceEnabled) {
+          _serviceEnabled = await location.requestService();
+          if (!_serviceEnabled) {
+            return null;
+          }
+        }
+
+        PermissionStatus _permissionGranted = await location.hasPermission();
+        if (_permissionGranted == PermissionStatus.denied) {
+          _permissionGranted = await location.requestPermission();
+          if (_permissionGranted != PermissionStatus.granted) {
+            return null;
+          }
+        }
+
+        return location.getLocation();
+      }(),
+      builder: (context, AsyncSnapshot<LocationData?> snapshot) {
+        final connectionDone = snapshot.connectionState == ConnectionState.done;
+
+        if (connectionDone) {
+          if (snapshot.hasData) {
+            final location = snapshot.data!;
+
+            if (location.latitude != null && location.longitude != null) {
+              initialCenter = CameraPosition(
+                target: LatLng(location.latitude!, location.longitude!),
+                zoom: 18,
+              );
+            }
+
+            return GoogleMap(
+              mapType: MapType.terrain,
+              initialCameraPosition: initialCenter,
+              compassEnabled: true,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+            );
+          } else {
+            return const Center(
+              child: Text('Location Permission Denied'),
+            );
+          }
+        } else {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
       },
     );
-
-    return googleMap!;
   }
 
   Widget incidentsScreen() {
