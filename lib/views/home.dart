@@ -251,24 +251,26 @@ class _HomeState extends State<Home> {
           const SizedBox(height: 40),
           Center(
             child: TextButton(
-                onPressed: () async {
-                  int statusCode = await widget.lineman.logout();
+              onPressed: () async {
+                int statusCode = await widget.lineman.logout();
 
-                  if (statusCode == 200) {
-                    Navigator.of(context)
-                        .popUntil((route) => Navigator.of(context).canPop());
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const Login(),
-                    ));
-                  }
-                },
-                child: const Text(
-                  'Log out',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 16,
-                  ),
-                )),
+                if (statusCode == 200) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Login(widget.lineman),
+                    ),
+                  );
+                }
+              },
+              child: const Text(
+                'Log out',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 16,
+                ),
+              ),
+            ),
           )
         ],
       ),
