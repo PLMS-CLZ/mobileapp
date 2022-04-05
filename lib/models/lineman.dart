@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'dart:io';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -10,6 +9,8 @@ const domain = "plms-clz.herokuapp.com";
 final preferences = SharedPreferences.getInstance();
 
 class Lineman {
+  SharedPreferences preferences;
+
   int? id;
   String? name;
   String? email;
@@ -17,14 +18,9 @@ class Lineman {
   String? apiToken;
   String? fcmToken;
 
-  Lineman();
+  Lineman(this.preferences);
 
-  Future<int> resume() async {
-    final prefs = await preferences;
-    final token = prefs.getString('apiToken');
-
-    if (token == null) return -1;
-
+  Future<int> resume(String token) async {
     final url = Uri.https(domain, '/api/lineman');
     final headers = <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.toString(),
@@ -57,7 +53,6 @@ class Lineman {
   }
 
   Future<int> login(String _email, String _password) async {
-    final prefs = await preferences;
     final url = Uri.https(domain, "/api/lineman/login");
     final headers = <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.toString(),
@@ -80,7 +75,7 @@ class Lineman {
       apiToken = data['token'];
       fcmToken = data['fcmToken'];
 
-      prefs.setString('apiToken', apiToken ?? '');
+      preferences.setString('apiToken', apiToken ?? '');
     } else {
       Fluttertoast.showToast(
         msg: data['message'] ?? 'Failed to login',
@@ -92,7 +87,6 @@ class Lineman {
   }
 
   Future<int> logout() async {
-    final prefs = await preferences;
     final url = Uri.https(domain, "/api/lineman/logout");
     final headers = <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.toString(),
@@ -115,7 +109,7 @@ class Lineman {
       apiToken = null;
       fcmToken = null;
 
-      prefs.remove('apiToken');
+      preferences.remove('apiToken');
     } else {
       Fluttertoast.showToast(
         msg: data['message'] ?? 'Failed to logout',
