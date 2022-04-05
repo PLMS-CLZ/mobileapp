@@ -1,3 +1,6 @@
+import 'package:plms_clz/models/lineman.dart';
+import 'package:plms_clz/views/resume.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:plms_clz/utils/notif.dart';
@@ -47,7 +50,41 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'PLMS',
       theme: ThemeData.dark(),
-      home: const Login(),
+      home: const Splash(),
+    );
+  }
+}
+
+class Splash extends StatelessWidget {
+  const Splash({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: SharedPreferences.getInstance(),
+      builder: (context, AsyncSnapshot<SharedPreferences> snapshot) {
+        final connectionDone = snapshot.connectionState == ConnectionState.done;
+
+        if (connectionDone && snapshot.hasData) {
+          final preferences = snapshot.data!;
+          final token = preferences.getString('apiToken');
+          final lineman = Lineman(preferences);
+
+          Future.delayed(const Duration(seconds: 1), () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    token == null ? Login(lineman) : Resume(lineman, token),
+              ),
+            );
+          });
+        }
+
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
 }
