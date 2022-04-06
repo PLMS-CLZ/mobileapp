@@ -6,7 +6,6 @@ import 'package:plms_clz/models/incident.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const domain = "plms-clz.herokuapp.com";
-final preferences = SharedPreferences.getInstance();
 
 class Lineman {
   SharedPreferences preferences;
