@@ -160,6 +160,7 @@ class _HomeState extends State<Home> {
               final incident = incidents[index];
 
               return Card(
+                elevation: 10,
                 child: ListTile(
                   minLeadingWidth: 0,
                   leading: Column(
@@ -282,7 +283,7 @@ class _HomeState extends State<Home> {
           ),
           const SizedBox(height: 5),
           Text(
-            widget.lineman.barangay ?? 'Not Set',
+            widget.lineman.contactNo ?? 'Not Set',
             style: const TextStyle(
               fontSize: 16,
             ),
