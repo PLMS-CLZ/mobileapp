@@ -15,6 +15,7 @@ class Lineman {
   String? name;
   String? email;
   String? barangay;
+  String? contactNo;
   String? apiToken;
   String? fcmToken;
 
@@ -40,6 +41,7 @@ class Lineman {
       name = data['name'];
       email = data['email'];
       barangay = data['barangay'];
+      contactNo = data['contact_no'];
       apiToken = token;
       fcmToken = data['fcmToken'];
     } else {
@@ -72,6 +74,7 @@ class Lineman {
       name = data['name'];
       email = data['email'];
       barangay = data['barangay'];
+      contactNo = data['contact_no'];
       apiToken = data['token'];
       fcmToken = data['fcmToken'];
 
@@ -106,6 +109,7 @@ class Lineman {
       name = null;
       email = null;
       barangay = null;
+      contactNo = null;
       apiToken = null;
       fcmToken = null;
 
