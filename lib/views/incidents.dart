@@ -3,6 +3,7 @@ import 'package:plms_clz/models/incident.dart';
 import 'package:plms_clz/models/lineman.dart';
 import 'package:plms_clz/views/home.dart';
 import 'package:plms_clz/views/profile.dart';
+import 'package:plms_clz/views/units.dart';
 
 class Incidents extends StatefulWidget {
   final Lineman lineman;
@@ -72,53 +73,63 @@ class _IncidentsState extends State<Incidents> {
               itemBuilder: (context, index) {
                 final incident = incidents[index];
 
-                return Card(
-                  elevation: 10,
-                  child: ListTile(
-                    title: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(5),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Incident ${incident.id}",
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            Text(incident.createdAt),
-                          ],
-                        ),
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Units(widget.lineman, incident),
                       ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Divider(thickness: 2),
-                        const SizedBox(height: 5),
-                        ...incident.info.reversed
-                            .map((e) => e.format())
-                            .reduce((value, element) {
-                          element.addAll(value);
-                          return element;
-                        }).toList(),
-                        const Divider(thickness: 2),
-                        const SizedBox(height: 5),
-                        const Text(
-                          "Areas Affected:",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                    );
+                  },
+                  child: Card(
+                    elevation: 10,
+                    child: ListTile(
+                      title: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Incident ${incident.id}",
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(incident.createdAt),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 5),
-                        ...incident.areasAffected(),
-                        const SizedBox(height: 20),
-                      ],
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Divider(thickness: 2),
+                          const SizedBox(height: 5),
+                          ...incident.info.reversed
+                              .map((e) => e.format())
+                              .reduce((value, element) {
+                            element.addAll(value);
+                            return element;
+                          }).toList(),
+                          const Divider(thickness: 2),
+                          const SizedBox(height: 5),
+                          const Text(
+                            "Areas Affected:",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          ...incident.areasAffected(),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
                   ),
                 );
