@@ -1,7 +1,12 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:plms_clz/models/incidentinfo.dart';
+import 'package:plms_clz/models/lineman.dart';
 import 'package:plms_clz/models/location.dart';
+import 'package:plms_clz/models/unit.dart';
+import 'package:plms_clz/utils/constants.dart';
 
 class Incident {
   int id;
@@ -32,6 +37,26 @@ class Incident {
         locations: (json['locations'] as List<dynamic>)
             .map((e) => Location.fromJson(e))
             .toList());
+  }
+
+  Future<List<Unit>> getUnits(Lineman lineman) async {
+    final url = Uri.https(domain, '/api/incidents/$id/units');
+    final headers = <String, String>{
+      HttpHeaders.contentTypeHeader: ContentType.json.toString(),
+      HttpHeaders.acceptHeader: ContentType.json.toString(),
+      HttpHeaders.authorizationHeader: "Bearer " + lineman.apiToken!,
+    };
+
+    final response = await http.get(
+      url,
+      headers: headers,
+    );
+
+    final data = jsonDecode(response.body) as List<dynamic>;
+
+    final units = data.map((e) => Unit.fromJson(e)).toList();
+
+    return units;
   }
 
   List<Widget> areasAffected() {
