@@ -3,9 +3,8 @@ import 'dart:io';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:plms_clz/models/incident.dart';
+import 'package:plms_clz/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-const domain = "plms-clz.herokuapp.com";
 
 class Lineman {
   SharedPreferences preferences;
