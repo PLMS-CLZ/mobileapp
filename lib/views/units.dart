@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:plms_clz/models/incident.dart';
-import 'package:plms_clz/models/lineman.dart';
 import 'package:plms_clz/models/unit.dart';
 import 'package:plms_clz/views/home.dart';
 import 'package:plms_clz/views/profile.dart';
 
 class Units extends StatefulWidget {
-  final Lineman lineman;
   final Incident incident;
-  const Units(this.lineman, this.incident, {Key? key}) : super(key: key);
+  const Units(this.incident, {Key? key}) : super(key: key);
 
   @override
   State<Units> createState() => _UnitsState();
@@ -44,7 +42,7 @@ class _UnitsState extends State<Units> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Home(widget.lineman),
+                  builder: (context) => const Home(),
                 ),
               );
               break;
@@ -52,14 +50,14 @@ class _UnitsState extends State<Units> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Profile(widget.lineman),
+                  builder: (context) => const Profile(),
                 ),
               );
           }
         },
       ),
       body: FutureBuilder(
-        future: widget.incident.getUnits(widget.lineman),
+        future: widget.incident.getUnits(),
         builder: (context, AsyncSnapshot<List<Unit>> snapshot) {
           final connectionDone =
               snapshot.connectionState == ConnectionState.done;

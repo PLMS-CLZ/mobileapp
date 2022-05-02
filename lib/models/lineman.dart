@@ -1,14 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:plms_clz/models/incident.dart';
 import 'package:plms_clz/utils/constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:plms_clz/utils/session.dart';
 
 class Lineman {
-  SharedPreferences preferences;
-
   int? id;
   String? name;
   String? email;
@@ -17,14 +16,14 @@ class Lineman {
   String? apiToken;
   String? fcmToken;
 
-  Lineman(this.preferences);
+  Lineman();
 
-  Future<int> resume(String token) async {
+  Future<int> resume() async {
     final url = Uri.https(domain, '/api/lineman');
     final headers = <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.toString(),
       HttpHeaders.acceptHeader: ContentType.json.toString(),
-      HttpHeaders.authorizationHeader: "Bearer " + token,
+      HttpHeaders.authorizationHeader: "Bearer " + apiToken!,
     };
 
     final response = await http.get(
@@ -40,13 +39,7 @@ class Lineman {
       email = data['email'];
       barangay = data['barangay'];
       contactNo = data['contact_no'];
-      apiToken = token;
       fcmToken = data['fcmToken'];
-    } else {
-      Fluttertoast.showToast(
-        msg: data['message'] ?? 'Failed to resume',
-        toastLength: Toast.LENGTH_LONG,
-      );
     }
 
     return response.statusCode;
@@ -76,7 +69,7 @@ class Lineman {
       apiToken = data['token'];
       fcmToken = data['fcmToken'];
 
-      preferences.setString('apiToken', apiToken ?? '');
+      Session.preferences.setString('apiToken', apiToken ?? '');
     } else {
       Fluttertoast.showToast(
         msg: data['message'] ?? 'Failed to login',
@@ -111,7 +104,7 @@ class Lineman {
       apiToken = null;
       fcmToken = null;
 
-      preferences.remove('apiToken');
+      Session.preferences.remove('apiToken');
     } else {
       Fluttertoast.showToast(
         msg: data['message'] ?? 'Failed to logout',
@@ -153,7 +146,10 @@ class Lineman {
     return response.statusCode;
   }
 
-  Future<void> updateFcmToken(String newToken) async {
+  Future<void> updateFcmToken() async {
+    String? token = await FirebaseMessaging.instance.getToken();
+    if (token == null) return;
+
     final url = Uri.https(domain, '/api/lineman/$id');
     final headers = <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.toString(),
@@ -164,13 +160,13 @@ class Lineman {
     final response = await http.patch(
       url,
       headers: headers,
-      body: jsonEncode({"fcm_token": newToken}),
+      body: jsonEncode({"fcm_token": token}),
     );
 
     final data = jsonDecode(response.body);
 
     if (response.statusCode == HttpStatus.ok) {
-      fcmToken = newToken;
+      fcmToken = token;
     } else {
       final errors = (data['errors']['fcm_token'] as List<dynamic>)
           .map((e) => e.toString()) as List<String>;

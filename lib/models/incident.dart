@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:plms_clz/models/incidentinfo.dart';
-import 'package:plms_clz/models/lineman.dart';
 import 'package:plms_clz/models/location.dart';
 import 'package:plms_clz/models/unit.dart';
 import 'package:plms_clz/utils/constants.dart';
+import 'package:plms_clz/utils/session.dart';
 
 class Incident {
   int id;
@@ -39,12 +39,12 @@ class Incident {
             .toList());
   }
 
-  Future<List<Unit>> getUnits(Lineman lineman) async {
+  Future<List<Unit>> getUnits() async {
     final url = Uri.https(domain, '/api/incidents/$id/units');
     final headers = <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.toString(),
       HttpHeaders.acceptHeader: ContentType.json.toString(),
-      HttpHeaders.authorizationHeader: "Bearer " + lineman.apiToken!,
+      HttpHeaders.authorizationHeader: "Bearer " + Session.lineman.apiToken!,
     };
 
     final response = await http.get(

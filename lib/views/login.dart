@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:plms_clz/models/lineman.dart';
+import 'package:plms_clz/utils/session.dart';
 import 'package:plms_clz/views/home.dart';
 
 class Login extends StatefulWidget {
-  final Lineman lineman;
-
-  const Login(this.lineman, {Key? key}) : super(key: key);
+  const Login({Key? key}) : super(key: key);
 
   @override
   _LoginState createState() => _LoginState();
@@ -153,13 +151,13 @@ class _LoginState extends State<Login> {
                           });
                         } else {
                           final statusCode =
-                              await widget.lineman.updatePassword(newPassword);
+                              await Session.lineman.updatePassword(newPassword);
 
                           if (statusCode == 200) {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => Login(widget.lineman),
+                                builder: (context) => const Login(),
                               ),
                             );
                           } else {
@@ -172,7 +170,7 @@ class _LoginState extends State<Login> {
                         final email = emailController.text;
                         final password = passwordController.text;
                         final statusCode =
-                            await widget.lineman.login(email, password);
+                            await Session.lineman.login(email, password);
 
                         if (statusCode == 200) {
                           if (password == "plmsystem") {
@@ -181,10 +179,12 @@ class _LoginState extends State<Login> {
                               inputEnabled = true;
                             });
                           } else {
+                            Session.initialize();
+
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => Home(widget.lineman),
+                                builder: (context) => const Home(),
                               ),
                             );
                           }

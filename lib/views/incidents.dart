@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:plms_clz/models/incident.dart';
-import 'package:plms_clz/models/lineman.dart';
+import 'package:plms_clz/utils/session.dart';
 import 'package:plms_clz/views/home.dart';
 import 'package:plms_clz/views/profile.dart';
 import 'package:plms_clz/views/units.dart';
 
 class Incidents extends StatefulWidget {
-  final Lineman lineman;
-  const Incidents(this.lineman, {Key? key}) : super(key: key);
+  const Incidents({Key? key}) : super(key: key);
 
   @override
   State<Incidents> createState() => _IncidentsState();
@@ -24,42 +23,43 @@ class _IncidentsState extends State<Incidents> {
         shadowColor: Colors.transparent,
       ),
       bottomNavigationBar: BottomNavigationBar(
-          currentIndex: 1,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.list),
-              label: 'Incidents',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle),
-              label: 'Profile',
-            ),
-          ],
-          onTap: (index) {
-            switch (index) {
-              case 0:
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Home(widget.lineman),
-                  ),
-                );
-                break;
-              case 2:
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Profile(widget.lineman),
-                  ),
-                );
-            }
-          }),
+        currentIndex: 1,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list),
+            label: 'Incidents',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle),
+            label: 'Profile',
+          ),
+        ],
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const Home(),
+                ),
+              );
+              break;
+            case 2:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const Profile(),
+                ),
+              );
+          }
+        },
+      ),
       body: FutureBuilder(
-        future: widget.lineman.getIncidents(),
+        future: Session.lineman.getIncidents(),
         builder: (context, AsyncSnapshot<List<Incident>> snapshot) {
           final connectionDone =
               snapshot.connectionState == ConnectionState.done;
@@ -78,7 +78,7 @@ class _IncidentsState extends State<Incidents> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Units(widget.lineman, incident),
+                        builder: (context) => Units(incident),
                       ),
                     );
                   },

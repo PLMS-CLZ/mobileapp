@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:plms_clz/models/lineman.dart';
+import 'package:plms_clz/utils/session.dart';
 import 'package:plms_clz/views/home.dart';
 import 'package:plms_clz/views/incidents.dart';
 import 'package:plms_clz/views/login.dart';
 
 class Profile extends StatefulWidget {
-  final Lineman lineman;
-  const Profile(this.lineman, {Key? key}) : super(key: key);
+  const Profile({Key? key}) : super(key: key);
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -44,7 +43,7 @@ class _ProfileState extends State<Profile> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => Home(widget.lineman),
+                    builder: (context) => const Home(),
                   ),
                 );
                 break;
@@ -52,7 +51,7 @@ class _ProfileState extends State<Profile> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => Incidents(widget.lineman),
+                    builder: (context) => const Incidents(),
                   ),
                 );
             }
@@ -77,7 +76,7 @@ class _ProfileState extends State<Profile> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    widget.lineman.name!,
+                    Session.lineman.name!,
                     style: const TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
@@ -96,7 +95,7 @@ class _ProfileState extends State<Profile> {
             ),
             const SizedBox(height: 5),
             Text(
-              widget.lineman.id?.toString() ?? 'Not Set',
+              Session.lineman.id?.toString() ?? 'Not Set',
               style: const TextStyle(
                 fontSize: 16,
               ),
@@ -111,7 +110,7 @@ class _ProfileState extends State<Profile> {
             ),
             const SizedBox(height: 5),
             Text(
-              widget.lineman.email ?? 'Not Set',
+              Session.lineman.email ?? 'Not Set',
               style: const TextStyle(
                 fontSize: 16,
               ),
@@ -126,7 +125,7 @@ class _ProfileState extends State<Profile> {
             ),
             const SizedBox(height: 5),
             Text(
-              widget.lineman.barangay ?? 'Not Set',
+              Session.lineman.barangay ?? 'Not Set',
               style: const TextStyle(
                 fontSize: 16,
               ),
@@ -141,7 +140,7 @@ class _ProfileState extends State<Profile> {
             ),
             const SizedBox(height: 5),
             Text(
-              widget.lineman.contactNo ?? 'Not Set',
+              Session.lineman.contactNo ?? 'Not Set',
               style: const TextStyle(
                 fontSize: 16,
               ),
@@ -150,13 +149,13 @@ class _ProfileState extends State<Profile> {
             Center(
               child: TextButton(
                 onPressed: () async {
-                  int statusCode = await widget.lineman.logout();
+                  int statusCode = await Session.lineman.logout();
 
                   if (statusCode == 200) {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Login(widget.lineman),
+                        builder: (context) => const Login(),
                       ),
                     );
                   }
