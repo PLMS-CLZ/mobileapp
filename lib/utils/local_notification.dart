@@ -9,7 +9,7 @@ const channel = AndroidNotificationChannel(
 
 final localNotification = FlutterLocalNotificationsPlugin();
 
-class Notif {
+class LocalNotification {
   static Future<void> init() async {
     final androidFLNP = localNotification.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
