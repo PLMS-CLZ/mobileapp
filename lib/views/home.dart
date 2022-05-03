@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:plms_clz/utils/constants.dart';
 import 'package:plms_clz/utils/session.dart';
 import 'package:plms_clz/views/incidents.dart';
 import 'package:plms_clz/views/profile.dart';
@@ -17,14 +16,10 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int selectedScreen = 0;
   Completer<GoogleMapController> gMapCompleter = Completer();
-  CameraPosition initialCenter = const CameraPosition(
-    target: cadizCity,
-    zoom: 15,
-  );
 
   @override
   void initState() {
-    gMapCompleter.future.then(Session.centerMapLocation);
+    gMapCompleter.future.then(Session.centerCamera);
 
     super.initState();
   }
@@ -76,10 +71,10 @@ class _HomeState extends State<Home> {
       ),
       body: GoogleMap(
         mapType: MapType.terrain,
-        initialCameraPosition: initialCenter,
+        initialCameraPosition: Session.cameraPosition,
         compassEnabled: true,
         myLocationEnabled: true,
-        myLocationButtonEnabled: true,
+        myLocationButtonEnabled: false,
         onMapCreated: gMapCompleter.complete,
       ),
     );
