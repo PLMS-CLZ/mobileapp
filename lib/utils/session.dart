@@ -39,23 +39,6 @@ class Session {
     _lineman.apiToken = _preferences.getString('apiToken');
     if (_lineman.apiToken != null) result = await _lineman.resume();
 
-    // Foreground Notification
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      final notification = message.notification;
-      final android = notification?.android;
-
-      if (_lineman.fcmToken != null) return;
-      if (notification != null) return;
-      if (android != null) return;
-
-      LocalNotification.show(
-        notification!.hashCode,
-        notification.title,
-        notification.body,
-        icon: android!.smallIcon,
-      );
-    });
-
     // Location
     _location = Location();
 
@@ -70,6 +53,26 @@ class Session {
     if (_permissionGranted == PermissionStatus.denied) {
       _permissionGranted = await _location.requestPermission();
     }
+
+    // Request notification permission
+    await FirebaseMessaging.instance.requestPermission();
+
+    // Foreground Notification
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      final notification = message.notification;
+      final android = notification?.android;
+
+      if (_lineman.fcmToken == null) return;
+      if (notification == null) return;
+      if (android == null) return;
+
+      LocalNotification.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        icon: android.smallIcon,
+      );
+    });
 
     final mapZoom = _preferences.getDouble('mapZoom') ?? 19;
     final mapLat = _preferences.getDouble('mapLat');
