@@ -69,7 +69,9 @@ class Lineman {
       apiToken = data['token'];
       fcmToken = data['fcmToken'];
 
-      Session.preferences.setString('apiToken', apiToken ?? '');
+      await updateFcmToken();
+      await Session.refreshIncidents();
+      await Session.preferences.setString('apiToken', apiToken!);
     } else {
       Fluttertoast.showToast(
         msg: data['message'] ?? 'Failed to login',
@@ -104,7 +106,7 @@ class Lineman {
       apiToken = null;
       fcmToken = null;
 
-      Session.preferences.remove('apiToken');
+      await Session.invalidate();
     } else {
       Fluttertoast.showToast(
         msg: data['message'] ?? 'Failed to logout',
