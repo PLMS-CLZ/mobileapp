@@ -10,8 +10,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 late Lineman _lineman;
 late SharedPreferences _preferences;
+late Location _location;
+late CameraPosition _cameraPosition;
 
-Location _location = Location();
 StreamSubscription<LocationData>? _subscription;
 
 class Session {
@@ -23,15 +24,22 @@ class Session {
     return _preferences;
   }
 
+  static CameraPosition get cameraPosition {
+    return _cameraPosition;
+  }
+
   static Future<int> initialize() async {
     int result = 0;
 
+    // Shared Preferences
     _preferences = await SharedPreferences.getInstance();
 
+    // Lineman
     _lineman = Lineman();
     _lineman.apiToken = _preferences.getString('apiToken');
     if (_lineman.apiToken != null) result = await _lineman.resume();
 
+    // Foreground Notification
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       final notification = message.notification;
       final android = notification?.android;
@@ -48,56 +56,37 @@ class Session {
       );
     });
 
+    // Location
+    _location = Location();
+
+    // Check if service is enabled
+    bool _serviceEnabled = await _location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await _location.requestService();
+    }
+
+    // Check if app has permission
+    PermissionStatus _permissionGranted = await _location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await _location.requestPermission();
+    }
+
+    final mapZoom = _preferences.getDouble('mapZoom') ?? 19;
+    final mapLat = _preferences.getDouble('mapLat');
+    final mapLng = _preferences.getDouble('mapLng');
+
+    final mapTarget =
+        (mapLat != null && mapLng != null) ? LatLng(mapLat, mapLng) : cadizCity;
+
+    _cameraPosition = CameraPosition(
+      target: mapTarget,
+      zoom: mapZoom,
+    );
+
     return result;
   }
 
-  static Future<LatLng> location() async {
-    // Check if service is enabled
-    bool _serviceEnabled = await _location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await _location.requestService();
-      if (!_serviceEnabled) {
-        return cadizCity;
-      }
-    }
-
-    // Check if app has permission
-    PermissionStatus _permissionGranted = await _location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await _location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return cadizCity;
-      }
-    }
-
-    final location = await _location.getLocation();
-    if (location.latitude == null || location.longitude == null) {
-      return cadizCity;
-    }
-
-    return LatLng(location.latitude!, location.longitude!);
-  }
-
-  static Future<void> centerMapLocation(
-      GoogleMapController? _controller) async {
-    // Check if service is enabled
-    bool _serviceEnabled = await _location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await _location.requestService();
-      if (!_serviceEnabled) {
-        return;
-      }
-    }
-
-    // Check if app has permission
-    PermissionStatus _permissionGranted = await _location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await _location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return;
-      }
-    }
-
+  static Future<void> centerCamera(GoogleMapController? _controller) async {
     // Cancel previous subscription
     _subscription?.cancel();
 
@@ -109,11 +98,23 @@ class Session {
       try {
         final zoom = await _controller?.getZoomLevel();
         final position = LatLng(event.latitude!, event.longitude!);
-        final cameraPosition =
-            CameraPosition(target: position, zoom: zoom ?? 15);
+
+        if (zoom != null && _cameraPosition.zoom != zoom) {
+          await _preferences.setDouble('mapZoom', zoom);
+        }
+
+        if (position.latitude != _cameraPosition.target.latitude) {
+          await _preferences.setDouble('mapLat', position.latitude);
+        }
+
+        if (position.longitude != _cameraPosition.target.longitude) {
+          await _preferences.setDouble('mapLng', position.longitude);
+        }
+
+        _cameraPosition = CameraPosition(target: position, zoom: zoom ?? 19);
 
         _controller?.animateCamera(
-          CameraUpdate.newCameraPosition(cameraPosition),
+          CameraUpdate.newCameraPosition(_cameraPosition),
         );
       } catch (_) {
         _controller?.dispose();
