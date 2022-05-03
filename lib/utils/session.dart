@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:plms_clz/models/incident.dart';
 import 'package:plms_clz/models/lineman.dart';
 import 'package:plms_clz/utils/constants.dart';
 import 'package:plms_clz/utils/local_notification.dart';
@@ -13,6 +14,7 @@ late SharedPreferences _preferences;
 late Location _location;
 late CameraPosition _cameraPosition;
 
+List<Incident> _incidents = [];
 StreamSubscription<LocationData>? _subscription;
 
 class Session {
@@ -26,6 +28,10 @@ class Session {
 
   static CameraPosition get cameraPosition {
     return _cameraPosition;
+  }
+
+  static List<Incident> get incidents {
+    return _incidents;
   }
 
   static Future<int> initialize() async {
@@ -86,7 +92,16 @@ class Session {
       zoom: mapZoom,
     );
 
+    if (result == 200) {
+      await refreshIncidents();
+      await _lineman.updateFcmToken();
+    }
+
     return result;
+  }
+
+  static Future<void> refreshIncidents() async {
+    _incidents = await _lineman.getIncidents();
   }
 
   static Future<void> centerCamera(GoogleMapController? _controller) async {
