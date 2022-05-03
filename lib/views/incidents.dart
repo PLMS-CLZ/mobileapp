@@ -13,6 +13,8 @@ class Incidents extends StatefulWidget {
 }
 
 class _IncidentsState extends State<Incidents> {
+  List<Incident> _incidents = Session.incidents;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,89 +60,82 @@ class _IncidentsState extends State<Incidents> {
           }
         },
       ),
-      body: FutureBuilder(
-        future: Session.lineman.getIncidents(),
-        builder: (context, AsyncSnapshot<List<Incident>> snapshot) {
-          final connectionDone =
-              snapshot.connectionState == ConnectionState.done;
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await Session.refreshIncidents();
 
-          if (connectionDone && snapshot.hasData) {
-            final incidents = snapshot.data!;
+          setState(() {
+            _incidents = Session.incidents;
+          });
+        },
+        child: ListView.builder(
+          padding: const EdgeInsets.all(5),
+          itemCount: _incidents.length,
+          itemBuilder: (context, index) {
+            final incident = _incidents[index];
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(5),
-              itemCount: incidents.length,
-              itemBuilder: (context, index) {
-                final incident = incidents[index];
-
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Units(incident),
-                      ),
-                    );
-                  },
-                  child: Card(
-                    elevation: 10,
-                    child: ListTile(
-                      title: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Incident ${incident.id}",
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              Text(incident.createdAt),
-                            ],
-                          ),
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Units(incident),
+                  ),
+                );
+              },
+              child: Card(
+                elevation: 10,
+                child: ListTile(
+                  title: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const Divider(thickness: 2),
-                          const SizedBox(height: 5),
-                          ...incident.info.reversed
-                              .map((e) => e.format())
-                              .reduce((value, element) {
-                            element.addAll(value);
-                            return element;
-                          }).toList(),
-                          const Divider(thickness: 2),
-                          const SizedBox(height: 5),
-                          const Text(
-                            "Areas Affected:",
-                            style: TextStyle(
+                          Text(
+                            "Incident ${incident.id}",
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
                             ),
                           ),
                           const SizedBox(height: 5),
-                          ...incident.areasAffected(),
-                          const SizedBox(height: 20),
+                          Text(incident.createdAt),
                         ],
                       ),
                     ),
                   ),
-                );
-              },
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Divider(thickness: 2),
+                      const SizedBox(height: 5),
+                      ...incident.info.reversed
+                          .map((e) => e.format())
+                          .reduce((value, element) {
+                        element.addAll(value);
+                        return element;
+                      }).toList(),
+                      const Divider(thickness: 2),
+                      const SizedBox(height: 5),
+                      const Text(
+                        "Areas Affected:",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      ...incident.areasAffected(),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
             );
-          } else {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
+          },
+        ),
       ),
     );
   }
