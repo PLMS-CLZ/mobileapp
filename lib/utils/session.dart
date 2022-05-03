@@ -10,9 +10,9 @@ import 'package:plms_clz/utils/local_notification.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 late Lineman _lineman;
-late SharedPreferences _preferences;
 late Location _location;
 late CameraPosition _cameraPosition;
+late SharedPreferences _preferences;
 
 List<Incident> _incidents = [];
 StreamSubscription<LocationData>? _subscription;
@@ -98,6 +98,12 @@ class Session {
     }
 
     return result;
+  }
+
+  static Future<void> invalidate() async {
+    _incidents = [];
+    _subscription?.cancel();
+    await _preferences.clear();
   }
 
   static Future<void> refreshIncidents() async {
