@@ -19,7 +19,9 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    gMapCompleter.future.then(Session.centerCamera);
+    gMapCompleter.future.then((value) {
+      Session.mapUpdates(setState: setState, controller: value);
+    });
 
     super.initState();
   }
@@ -76,6 +78,20 @@ class _HomeState extends State<Home> {
         myLocationEnabled: true,
         myLocationButtonEnabled: false,
         onMapCreated: gMapCompleter.complete,
+        markers: {
+          if (Session.navDestination != null) Session.navDestination!,
+        },
+        polylines: {
+          if (Session.navDirections != null)
+            Polyline(
+              polylineId: const PolylineId("navigation"),
+              color: Colors.red,
+              width: 5,
+              points: Session.navDirections!.polylinePoints
+                  .map((e) => LatLng(e.latitude, e.longitude))
+                  .toList(),
+            ),
+        },
       ),
     );
   }

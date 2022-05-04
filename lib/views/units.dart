@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:plms_clz/models/incident.dart';
 import 'package:plms_clz/models/unit.dart';
+import 'package:plms_clz/utils/session.dart';
 import 'package:plms_clz/views/home.dart';
 import 'package:plms_clz/views/profile.dart';
 
@@ -71,22 +72,33 @@ class _UnitsState extends State<Units> {
               itemBuilder: (context, index) {
                 final unit = units[index];
 
-                return Card(
-                  elevation: 10,
-                  child: ListTile(
-                    title: Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        "Unit ${unit.id}",
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                return GestureDetector(
+                  onTap: () async {
+                    await Session.navigateTo(unit);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Home(),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    elevation: 10,
+                    child: ListTile(
+                      title: Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Text(
+                          "Unit ${unit.id}",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: unit.format(),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: unit.format(),
+                      ),
                     ),
                   ),
                 );
